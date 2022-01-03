@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">@color/dark_blue</color>
-    <color name="colorPrimaryVariant">@color/light_blue</color>
+    <color name="colorPrimary">@color/light_blue</color>
+    <color name="colorPrimaryVariant">@color/dark_blue</color>
     <color name="colorOnPrimary">@color/white</color>
-    <color name="colorSecondary">@color/orange</color>
-    <color name="colorSecondaryVariant">@color/light_orange</color>
+    <color name="colorSecondary">@color/light_orange</color>
+    <color name="colorSecondaryVariant">@color/orange</color>
     <color name="colorOnSecondary">@color/black</color>
 
     <color name="dark_blue">#000083</color>
