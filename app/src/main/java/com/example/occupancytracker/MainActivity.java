@@ -15,9 +15,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void viewOccupancy(View view) {
-//        Intent intent = new Intent(this, SendTextActivity.class);
-//        intent.putExtra(SendTextActivity.KEY_IS_NEW, true);
-//        startActivity(intent);
+        Intent intent = new Intent(this, OccupancyActivity.class);
+        startActivity(intent);
     }
 
     public void viewData(View view) {

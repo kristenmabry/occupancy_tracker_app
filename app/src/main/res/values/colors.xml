@@ -8,7 +8,7 @@
     <color name="colorOnSecondary">@color/black</color>
 
     <color name="dark_blue">#000083</color>
-    <color name="light_blue">#4040CC</color>
+    <color name="light_blue">#3F57CC</color>
     <color name="orange">#F56E00</color>
     <color name="light_orange">#FF8F33</color>
     <color name="black">#000000</color>

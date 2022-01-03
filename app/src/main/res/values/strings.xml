@@ -3,4 +3,6 @@
     <string name="stored_data">Stored Data</string>
     <string name="view_occupancy">View Occupancy</string>
     <string name="connect_device">Connect Device</string>
+    <string name="occupancy">Occupancy:</string>
+    <string name="bluetooth_devices">Bluetooth Devices</string>
 </resources>

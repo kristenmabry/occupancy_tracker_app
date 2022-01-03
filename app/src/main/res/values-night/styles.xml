@@ -10,7 +10,8 @@
         <item name="android:paddingVertical">20dp</item>
     </style>
     <style name="toolbarStyle" parent="Widget.AppCompat.Toolbar.Button.Navigation">
-        <item name="android:color">@color/colorPrimary</item>
+        <item name="android:background">@color/colorPrimary</item>
         <item name="android:titleTextColor">@color/colorOnPrimary</item>
+        <item name="colorControlNormal">@color/colorOnPrimary</item>
     </style>
 </resources>
