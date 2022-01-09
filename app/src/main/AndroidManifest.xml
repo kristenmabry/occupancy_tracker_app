@@ -9,7 +9,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.OccupancyTracker">
-        <activity android:name=".OccupancyActivity"></activity>
+        <activity android:name=".SavedDataActivity" />
+        <activity android:name=".DevicesActivity" />
+        <activity android:name=".OccupancyActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

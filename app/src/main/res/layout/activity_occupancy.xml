@@ -30,9 +30,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="50dp"
-            android:layout_marginTop="20dp"
-            android:textSize="30dp"
+            android:layout_marginStart="50dp"
+            android:layout_marginTop="@dimen/default_margin"
+            android:textSize="30sp"
             android:textColor="@color/colorPrimary"
             android:text="84%" />
 
@@ -43,7 +43,7 @@
             android:layout_height="50dp"
             android:layout_alignParentEnd="true"
             android:layout_marginTop="10dp"
-            android:layout_marginEnd="20dp"
+            android:layout_marginEnd="@dimen/default_margin"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:src="@drawable/refresh_circle" />
@@ -76,25 +76,27 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="@dimen/default_margin"
         android:orientation="horizontal"
         android:gravity="center">
         <Button
             android:id="@+id/options_button"
-            android:text="@string/view_occupancy"
-            android:layout_width="wrap_content"
+            android:onClick="openOptionsPopup"
+            android:text="@string/options"
+            android:layout_width="160dp"
             android:layout_height="wrap_content"
             android:theme="@style/buttonStyle"
-            android:layout_marginRight="20dp"
-            android:textSize="15dp"
+            android:layout_marginEnd="@dimen/default_margin"
+            android:textSize="15sp"
             />
 
         <Button
             android:id="@+id/export_button"
-            android:layout_width="wrap_content"
+            android:onClick="exportData"
+            android:layout_width="160dp"
             android:layout_height="wrap_content"
-            android:text="@string/view_occupancy"
-            android:textSize="15dp"
+            android:text="@string/export_data"
+            android:textSize="15sp"
             android:theme="@style/buttonStyle" />
     </LinearLayout>
 

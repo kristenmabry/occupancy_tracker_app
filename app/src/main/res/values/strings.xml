@@ -5,4 +5,8 @@
     <string name="connect_device">Connect Device</string>
     <string name="occupancy">Occupancy:</string>
     <string name="bluetooth_devices">Bluetooth Devices</string>
+    <string name="options">Options</string>
+    <string name="export_data">Export Data</string>
+    <string name="no_bluetooth_devices">No Bluetooth devices were found.</string>
+    <string name="no_stored_data">No data has been saved to this device.</string>
 </resources>

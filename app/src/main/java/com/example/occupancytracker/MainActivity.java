@@ -20,12 +20,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void viewData(View view) {
-//        Intent intent = new Intent(this, ViewLayoutsActivity.class);
-//        startActivity(intent);
+        Intent intent = new Intent(this, SavedDataActivity.class);
+        startActivity(intent);
     }
 
     public void viewDevices(View view) {
-//        Intent intent = new Intent(this, ViewBluetoothDevices.class);
-//        startActivity(intent);
+        Intent intent = new Intent(this, DevicesActivity.class);
+        startActivity(intent);
     }
 }
