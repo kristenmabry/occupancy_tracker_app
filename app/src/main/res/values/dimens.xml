@@ -2,4 +2,5 @@
 <resources>
     <dimen name="default_margin">20dp</dimen>
     <dimen name="default_font_size">20sp</dimen>
+    <dimen name="selected_box">15dp</dimen>
 </resources>
