@@ -4,12 +4,14 @@ import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -53,7 +55,11 @@ public class BluetoothDevicesAdapter extends RecyclerView.Adapter<BluetoothDevic
         holder.view.setId(position);
         holder.view.setBackground(ContextCompat.getDrawable(viewGroup.getContext(), R.drawable.list_item_ripple_effect));
         holder.view.setOnClickListener(this);
-        holder.titleView.setText(dataset.get(position).getName());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            holder.titleView.setText(dataset.get(position).getAlias());
+        } else {
+            holder.titleView.setText(dataset.get(position).getName());
+        }
         holder.subtitleView.setText(dataset.get(position).getAddress());
         holder.subtitleView.setTextColor(getColor(viewGroup.getContext(), android.R.color.darker_gray));
         if (device.getAddress().equals(this.selectedAddress)) {
