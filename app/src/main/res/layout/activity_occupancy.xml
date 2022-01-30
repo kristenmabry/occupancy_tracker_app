@@ -28,6 +28,7 @@
         android:layout_gravity="fill">
 
         <TextView
+            android:id="@+id/battery_percent"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="50dp"
