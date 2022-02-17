@@ -17,10 +17,10 @@ import no.nordicsemi.android.ble.data.Data;
 import no.nordicsemi.android.ble.livedata.ObservableBleManager;
 
 public class OccupancyManager extends ObservableBleManager {
-    /** Nordic Blinky Service UUID. */
-    public final static UUID LBS_UUID_SERVICE = UUID.fromString("00001523-1212-efde-1523-785feabcd123");
-    /** BUTTON characteristic UUID. */
-    private final static UUID LBS_UUID_OCCUPANCY_CHAR = UUID.fromString("00001524-1212-efde-1523-785feabcd123");
+    /** Occupancy Tracker Service UUID. */
+    public final static UUID LBS_UUID_SERVICE = UUID.fromString("9fed1400-fc85-41c0-be7b-0c6ec45d960e");
+    /** Occupancy Number characteristic UUID. */
+    private final static UUID LBS_UUID_OCCUPANCY_INT = UUID.fromString("9fed1401-fc85-41c0-be7b-0c6ec45d960e");
     /** LED characteristic UUID. */
     private final static UUID LBS_UUID_LED_CHAR = UUID.fromString("00001525-1212-efde-1523-785feabcd123");
 
@@ -96,7 +96,7 @@ public class OccupancyManager extends ObservableBleManager {
         public boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
             final BluetoothGattService service = gatt.getService(LBS_UUID_SERVICE);
             if (service != null) {
-                occupancyCharacteristic = service.getCharacteristic(LBS_UUID_OCCUPANCY_CHAR);
+                occupancyCharacteristic = service.getCharacteristic(LBS_UUID_OCCUPANCY_INT);
             }
 
 //            boolean writeRequest = false;

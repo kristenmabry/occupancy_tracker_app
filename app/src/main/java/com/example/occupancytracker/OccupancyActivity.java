@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -27,8 +28,7 @@ public class OccupancyActivity extends AppCompatActivity {
         this.initToolbar();
 
         final Intent intent = getIntent();
-        final DiscoveredBluetoothDevice device = intent.getParcelableExtra(EXTRA_DEVICE);
-
+        final BluetoothDevice device = BluetoothUtils.getSelectedDevice(this);
 
 //        if (BluetoothUtils.isAddressValid(this)) {
 //            final String deviceAddress = BluetoothUtils.getSelectedAddress(this);

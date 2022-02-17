@@ -37,10 +37,10 @@ public class OccupancyViewModel extends AndroidViewModel {
      *
      * @param target the target device.
      */
-    public void connect(@NonNull final DiscoveredBluetoothDevice target) {
+    public void connect(@NonNull final BluetoothDevice target) {
         // Prevent from calling again when called again (screen orientation changed).
         if (device == null) {
-            device = target.getDevice();
+            device = target;
             reconnect();
         }
     }
