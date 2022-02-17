@@ -15,6 +15,17 @@ public class BluetoothUtils {
         return sharedPref.getString(c.getString(R.string.save_selected_device_key), BluetoothUtils.NO_ADDRESS);
     }
 
+    public static BluetoothDevice getSelectedDevice(Context c) {
+        String address = getSelectedAddress(c);
+        BluetoothDevice[] devices = getAllDevices();
+        for (int i = 0; i < devices.length; i++) {
+            if (devices[i].getAddress().equals(address)) {
+                return devices[i];
+            }
+        }
+        return null;
+    }
+
     public static boolean isAddressValid(Context c) {
         String address = getSelectedAddress(c);
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
