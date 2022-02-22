@@ -11,4 +11,6 @@
     <string name="no_stored_data">No data has been saved to this device.</string>
     <string name="save_selected_device_key">SelectedBluetoothDevice</string>
     <string name="shared_preferences_file_key">com.example.occupancytracker.bluetooth</string>
+    <string name="ceiling_height">Ceiling Height (m)</string>
+    <string name="reset_occupancy">Reset Occupancy Number</string>
 </resources>
