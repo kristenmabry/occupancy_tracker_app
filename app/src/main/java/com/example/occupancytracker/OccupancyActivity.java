@@ -9,9 +9,12 @@ import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -113,45 +116,78 @@ public class OccupancyActivity extends AppCompatActivity {
     }
 
     public void openOptionsPopup(View view) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Options");
+        runOnUiThread(new Runnable() {
+              public void run() {
+            AlertDialog.Builder builder = new AlertDialog.Builder(OccupancyActivity.this);
+            builder.setTitle("Options");
 
-        LinearLayout lila1= new LinearLayout(this);
-        lila1.setOrientation(LinearLayout.VERTICAL);
-        final EditText ceilingHeightInput = new EditText(this);
-        ceilingHeightInput.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        ceilingHeightInput.setHint(getResources().getString(R.string.ceiling_height));
-        if (ceilingHeight != null) {
-            ceilingHeightInput.setText(ceilingHeight.toString());
-        }
-        final EditText resetOccupancyInput = new EditText(this);
-        resetOccupancyInput.setInputType(InputType.TYPE_CLASS_NUMBER);
-        resetOccupancyInput.setHint(getResources().getString(R.string.reset_occupancy));
-        lila1.addView(ceilingHeightInput);
-        lila1.addView(resetOccupancyInput);
-        builder.setView(lila1);
-
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                final String ceilingHeight = ceilingHeightInput.getText().toString();
-                if (!ceilingHeight.equals("")) {
-                    viewModel.setCeilingHeight((int)(Float.parseFloat(ceilingHeight) * 1000));
-                }
-                final String occupancySubmit = resetOccupancyInput.getText().toString();
-                if (!occupancySubmit.equals("")) {
-                    viewModel.setOccupancy(Integer.parseInt(occupancySubmit));
-                }
+            LinearLayout lila1= new LinearLayout(OccupancyActivity.this);
+            lila1.setOrientation(LinearLayout.VERTICAL);
+            final EditText ceilingHeightInput = new EditText(OccupancyActivity.this);
+            ceilingHeightInput.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            ceilingHeightInput.setHint(getResources().getString(R.string.ceiling_height));
+            if (ceilingHeight != null) {
+                ceilingHeightInput.setText(ceilingHeight.toString());
             }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+            final EditText resetOccupancyInput = new EditText(OccupancyActivity.this);
+            resetOccupancyInput.setInputType(InputType.TYPE_CLASS_NUMBER);
+            resetOccupancyInput.setHint(getResources().getString(R.string.reset_occupancy));
+            lila1.addView(ceilingHeightInput);
+            lila1.addView(resetOccupancyInput);
+            builder.setView(lila1);
 
-        builder.show();
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    final String ceilingHeight = ceilingHeightInput.getText().toString();
+                    if (!ceilingHeight.equals("")) {
+                        viewModel.setCeilingHeight((int)(Float.parseFloat(ceilingHeight) * 1000));
+                    }
+                    final String occupancySubmit = resetOccupancyInput.getText().toString();
+                    if (!occupancySubmit.equals("")) {
+                        viewModel.setOccupancy(Integer.parseInt(occupancySubmit));
+                    }
+                }
+            });
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+
+            AlertDialog dialog = builder.show();
+            ceilingHeightInput.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    final String ceilingHeight = ceilingHeightInput.getText().toString();
+                    Button okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                    try {
+                        if (Float.parseFloat(ceilingHeight) > 4.0) {
+                            ceilingHeightInput.setError("Ceiling height must be 4.0 m or less");
+                            okButton.setEnabled(false);
+                        } else {
+                            ceilingHeightInput.setError(null);
+                            okButton.setEnabled(true);
+                        }
+                    } catch (NumberFormatException e) {
+                        ceilingHeightInput.setError(null);
+                        okButton.setEnabled(true);
+                    }
+                }
+            });
+              }
+        });
     }
 
     public void exportData(View view) {

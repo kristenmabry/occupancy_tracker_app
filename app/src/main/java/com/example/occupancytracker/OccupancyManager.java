@@ -90,7 +90,7 @@ public class OccupancyManager extends ObservableBleManager {
         public void onCeilingHeightStateChanged(@NonNull final BluetoothDevice device,
                                       final Integer height) {
             ceilingHeight = height;
-            log(Log.VERBOSE, "Ceiling height: " + height.toString() + " m");
+            log(Log.VERBOSE, "Ceiling height: " + height.toString() + " mm");
             ceilingHeightState.setValue(height);
         }
 
