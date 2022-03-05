@@ -18,7 +18,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ActivityCompat.requestPermissions(MainActivity.this, new String[] { Manifest.permission.BLUETOOTH }, 1);
+        if (android.os.Build.VERSION.SDK_INT <= 30) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[] { Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN }, 1);
+        }
     }
 
     @Override
@@ -31,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
                 grantResults);
 
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(MainActivity.this, "Bluetooth permission granted", Toast.LENGTH_SHORT) .show();
+//            Toast.makeText(MainActivity.this, "Bluetooth permission granted", Toast.LENGTH_SHORT) .show();
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             if (!bluetoothAdapter.isEnabled()) {
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);

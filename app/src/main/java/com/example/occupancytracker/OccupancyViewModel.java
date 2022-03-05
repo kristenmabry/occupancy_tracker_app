@@ -66,7 +66,7 @@ public class OccupancyViewModel extends AndroidViewModel {
     /**
      * Disconnect from peripheral.
      */
-    private void disconnect() {
+    public void disconnect() {
         device = null;
         if (connectRequest != null) {
             connectRequest.cancelPendingConnection();

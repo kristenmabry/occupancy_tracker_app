@@ -111,6 +111,7 @@ public class OccupancyManager extends ObservableBleManager {
         protected void initialize() {
             setNotificationCallback(occupancyCharacteristic).with(occupancyCallback);
             readCharacteristic(occupancyCharacteristic).with(occupancyCallback).enqueue();
+            readCharacteristic(ceilingHeightCharacteristic).with(ceilingHeightCallback).enqueue();
             enableNotifications(occupancyCharacteristic).enqueue();
         }
 
@@ -151,7 +152,7 @@ public class OccupancyManager extends ObservableBleManager {
         log(Log.VERBOSE, "Setting height to " + height.toString() + "...");
         byte[] array = new byte[] {
                 (byte)((height >> 8) & 0xff),
-                (byte)((height >> 0) & 0xff),
+                (byte)(height & 0xff),
         };
         writeCharacteristic(
                 ceilingHeightCharacteristic,
@@ -168,7 +169,7 @@ public class OccupancyManager extends ObservableBleManager {
         log(Log.VERBOSE, "Setting occupancy to " + newOccupancy.toString() + "...");
         writeCharacteristic(
                 occupancyCharacteristic,
-                Data.from(newOccupancy.toString()),
+                new byte[] {(byte) (newOccupancy & 0xff)},
                 BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
         ).with(occupancyCallback).enqueue();
     }

@@ -10,11 +10,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.example.occupancytracker.databinding.ActivityOccupancyBinding;
 
@@ -33,6 +33,7 @@ public class OccupancyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityOccupancyBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        binding.exportButton.setEnabled(false);
         this.initToolbar();
 
         final Intent intent = getIntent();
@@ -45,63 +46,47 @@ public class OccupancyActivity extends AppCompatActivity {
 
         // Configure the view model.
         viewModel = new ViewModelProvider(this).get(OccupancyViewModel.class);
-//        runOnUiThread(new Runnable() {
-//              public void run() {
-        viewModel.connect(device);
-        viewModel.getOccupancyState().observe(OccupancyActivity.this, total -> binding.occupancyNumber.setText(total.toString()));
-        viewModel.getCeilingHeightState().observe(this, height -> ceilingHeight = (float) (height / 1000.0));
-//              }
-//          });
-
-        // Set up views.
-//        binding.ledSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> viewModel.setLedState(isChecked));
-//        binding.infoNotSupported.actionRetry.setOnClickListener(v -> viewModel.reconnect());
-//        binding.infoTimeout.actionRetry.setOnClickListener(v -> viewModel.reconnect());
-
-//        viewModel.getConnectionState().observe(this, state -> {
-//            switch (state.getState()) {
-//                case CONNECTING:
-//                    binding.progressContainer.setVisibility(View.VISIBLE);
-//                    binding.infoNotSupported.container.setVisibility(View.GONE);
-//                    binding.infoTimeout.container.setVisibility(View.GONE);
-//                    binding.connectionState.setText(R.string.state_connecting);
-//                    break;
-//                case INITIALIZING:
-//                    binding.connectionState.setText(R.string.state_initializing);
-//                    break;
-//                case READY:
-//                    binding.progressContainer.setVisibility(View.GONE);
-//                    binding.deviceContainer.setVisibility(View.VISIBLE);
-//                    onConnectionStateChanged(true);
-//                    break;
-//                case DISCONNECTED:
-//                    if (state instanceof ConnectionState.Disconnected) {
-//                        binding.deviceContainer.setVisibility(View.GONE);
-//                        binding.progressContainer.setVisibility(View.GONE);
-//                        final ConnectionState.Disconnected stateWithReason = (ConnectionState.Disconnected) state;
-//                        if (stateWithReason.getReason() == ConnectionObserver.REASON_NOT_SUPPORTED) {
-//                            binding.infoNotSupported.container.setVisibility(View.VISIBLE);
-//                        } else {
-//                            binding.infoTimeout.container.setVisibility(View.VISIBLE);
-//                        }
-//                    }
-//                    // fallthrough
-//                case DISCONNECTING:
-//                    onConnectionStateChanged(false);
-//                    break;
-//            }
-//        });
-
+        runOnUiThread(new Runnable() {
+              public void run() {
+                viewModel.connect(device);
+                viewModel.getOccupancyState().observe(OccupancyActivity.this, total -> binding.occupancyNumber.setText(total.toString()));
+                viewModel.getCeilingHeightState().observe(OccupancyActivity.this, height -> ceilingHeight = (float) (height / 1000.0));
+                viewModel.getConnectionState().observe(OccupancyActivity.this, state -> {
+                      switch (state.getState()) {
+                          case CONNECTING:
+                              break;
+                          case INITIALIZING:
+                              break;
+                          case READY:
+                              onConnectionStateChanged(true);
+                              break;
+                          case DISCONNECTED:
+                              if (state instanceof ConnectionState.Disconnected) {
+                                  final ConnectionState.Disconnected stateWithReason = (ConnectionState.Disconnected) state;
+                                  Log.v("DISCONNECT", String.valueOf(stateWithReason.getReason()));
+                                  if (stateWithReason.getReason() == ConnectionObserver.REASON_TIMEOUT) {
+                                      Toast.makeText(OccupancyActivity.this, "Error: Timed out trying to connect to device", Toast.LENGTH_SHORT).show();
+                                  } else if (stateWithReason.getReason() != ConnectionObserver.REASON_UNKNOWN) {
+                                      viewModel.reconnect();
+                                  }
+                              }
+                          case DISCONNECTING:
+                              onConnectionStateChanged(false);
+                              break;
+                      }
+              });
+              }
+          });
     }
 
     private void initToolbar() {
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-//        getSupportActionBar().setTitle(getResources().getString(R.string.bluetooth_devices));
         binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                viewModel.disconnect();
                 Intent intent = new Intent(OccupancyActivity.this, MainActivity.class);
                 startActivity(intent);
             }
@@ -111,8 +96,15 @@ public class OccupancyActivity extends AppCompatActivity {
     private void onConnectionStateChanged(final boolean connected) {
         binding.refresh.setEnabled(connected);
         if (!connected) {
-            binding.batteryPercent.setText("0%");
-            binding.occupancyNumber.setText("0%");
+//            binding.batteryPercent.setText("0%");
+            binding.occupancyNumber.setText("--");
+            binding.optionsButton.setEnabled(false);
+            binding.exportButton.setEnabled(false);
+        }
+        else {
+            Toast.makeText(this, "Successfully connected to device", Toast.LENGTH_SHORT).show();
+            binding.optionsButton.setEnabled(true);
+//            binding.exportButton.setEnabled(true);
         }
     }
 
