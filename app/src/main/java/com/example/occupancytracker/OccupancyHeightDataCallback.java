@@ -4,6 +4,8 @@ import android.bluetooth.BluetoothDevice;
 
 import androidx.annotation.NonNull;
 
+import java.nio.ByteBuffer;
+
 import no.nordicsemi.android.ble.callback.DataSentCallback;
 import no.nordicsemi.android.ble.callback.profile.ProfileDataCallback;
 import no.nordicsemi.android.ble.data.Data;
@@ -21,12 +23,14 @@ public abstract class OccupancyHeightDataCallback implements ProfileDataCallback
     }
 
     private void parse(@NonNull final BluetoothDevice device, @NonNull final Data data) {
-        if (data.size() != 1) {
+        if (data.size() != 2) {
             onInvalidDataReceived(device, data);
             return;
         }
 
-        final int height = data.getIntValue(Data.FORMAT_UINT8, 0);
+        byte[] dataBytes = data.getValue();
+        byte[] array = { 0x00, 0x00, dataBytes[0], dataBytes[1] };
+        final Integer height = ByteBuffer.wrap(array).getInt();
         onCeilingHeightStateChanged(device, height);
     }
 }

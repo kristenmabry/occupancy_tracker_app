@@ -74,7 +74,7 @@ public class OccupancyManager extends ObservableBleManager {
         @Override
         public void onOccupancyStateChanged(@NonNull final BluetoothDevice device,
                                          final Integer total) {
-            Log.i("OccupancyDataCallback", "Occupancy: " + total.toString());
+            log(Log.VERBOSE, "Occupancy: " + total.toString());
             occupancyState.setValue(total);
         }
 
@@ -90,7 +90,7 @@ public class OccupancyManager extends ObservableBleManager {
         public void onCeilingHeightStateChanged(@NonNull final BluetoothDevice device,
                                       final Integer height) {
             ceilingHeight = height;
-            log(Log.VERBOSE, "Ceiling height " + height.toString() + " m");
+            log(Log.VERBOSE, "Ceiling height: " + height.toString() + " m");
             ceilingHeightState.setValue(height);
         }
 
@@ -119,6 +119,7 @@ public class OccupancyManager extends ObservableBleManager {
             final BluetoothGattService service = gatt.getService(LBS_UUID_SERVICE);
             if (service != null) {
                 occupancyCharacteristic = service.getCharacteristic(LBS_UUID_OCCUPANCY_INT);
+                ceilingHeightCharacteristic = service.getCharacteristic(LBS_UUID_HEIGHT_INT);
             }
 
             boolean writeRequest = false;
@@ -148,9 +149,13 @@ public class OccupancyManager extends ObservableBleManager {
             return;
 
         log(Log.VERBOSE, "Setting height to " + height.toString() + "...");
+        byte[] array = new byte[] {
+                (byte)((height >> 8) & 0xff),
+                (byte)((height >> 0) & 0xff),
+        };
         writeCharacteristic(
                 ceilingHeightCharacteristic,
-                Data.from(height.toString()),
+                array,
                 BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
         ).with(ceilingHeightCallback).enqueue();
     }

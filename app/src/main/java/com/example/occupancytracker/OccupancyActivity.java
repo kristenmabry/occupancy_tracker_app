@@ -26,7 +26,7 @@ public class OccupancyActivity extends AppCompatActivity {
 
     private OccupancyViewModel viewModel;
     private ActivityOccupancyBinding binding;
-    private Integer ceilingHeight;
+    private Float ceilingHeight = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +45,13 @@ public class OccupancyActivity extends AppCompatActivity {
 
         // Configure the view model.
         viewModel = new ViewModelProvider(this).get(OccupancyViewModel.class);
+//        runOnUiThread(new Runnable() {
+//              public void run() {
         viewModel.connect(device);
+        viewModel.getOccupancyState().observe(OccupancyActivity.this, total -> binding.occupancyNumber.setText(total.toString()));
+        viewModel.getCeilingHeightState().observe(this, height -> ceilingHeight = (float) (height / 1000.0));
+//              }
+//          });
 
         // Set up views.
 //        binding.ledSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> viewModel.setLedState(isChecked));
@@ -85,9 +91,7 @@ public class OccupancyActivity extends AppCompatActivity {
 //                    break;
 //            }
 //        });
-        viewModel.getCeilingHeightState().observe(this, height -> ceilingHeight = height);
-        viewModel.getOccupancyState().observe(this,
-                total -> binding.occupancyNumber.setText(total.toString()));
+
     }
 
     private void initToolbar() {
@@ -123,9 +127,11 @@ public class OccupancyActivity extends AppCompatActivity {
         LinearLayout lila1= new LinearLayout(this);
         lila1.setOrientation(LinearLayout.VERTICAL);
         final EditText ceilingHeightInput = new EditText(this);
-        ceilingHeightInput.setInputType(InputType.TYPE_CLASS_NUMBER);
+        ceilingHeightInput.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
         ceilingHeightInput.setHint(getResources().getString(R.string.ceiling_height));
-        ceilingHeightInput.setText(ceilingHeight.toString());
+        if (ceilingHeight != null) {
+            ceilingHeightInput.setText(ceilingHeight.toString());
+        }
         final EditText resetOccupancyInput = new EditText(this);
         resetOccupancyInput.setInputType(InputType.TYPE_CLASS_NUMBER);
         resetOccupancyInput.setHint(getResources().getString(R.string.reset_occupancy));
@@ -137,11 +143,11 @@ public class OccupancyActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 final String ceilingHeight = ceilingHeightInput.getText().toString();
-                if (ceilingHeight != "") {
-                    viewModel.setCeilingHeight(Integer.parseInt(ceilingHeight));
+                if (!ceilingHeight.equals("")) {
+                    viewModel.setCeilingHeight((int)(Float.parseFloat(ceilingHeight) * 1000));
                 }
                 final String occupancySubmit = resetOccupancyInput.getText().toString();
-                if (occupancySubmit != "") {
+                if (!occupancySubmit.equals("")) {
                     viewModel.setOccupancy(Integer.parseInt(occupancySubmit));
                 }
             }
