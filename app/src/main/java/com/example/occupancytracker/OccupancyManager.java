@@ -167,9 +167,13 @@ public class OccupancyManager extends ObservableBleManager {
             return;
 
         log(Log.VERBOSE, "Setting occupancy to " + newOccupancy.toString() + "...");
+        byte[] array = new byte[] {
+                (byte)((newOccupancy >> 8) & 0xff),
+                (byte)(newOccupancy & 0xff),
+        };
         writeCharacteristic(
                 occupancyCharacteristic,
-                new byte[] {(byte) (newOccupancy & 0xff)},
+                array,
                 BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
         ).with(occupancyCallback).enqueue();
     }
