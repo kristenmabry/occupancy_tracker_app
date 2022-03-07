@@ -4,6 +4,8 @@ import android.bluetooth.BluetoothDevice;
 
 import androidx.annotation.NonNull;
 
+import java.nio.ByteBuffer;
+
 import no.nordicsemi.android.ble.callback.DataSentCallback;
 import no.nordicsemi.android.ble.callback.profile.ProfileDataCallback;
 import no.nordicsemi.android.ble.data.Data;
@@ -27,7 +29,9 @@ public abstract class OccupancyDataCallback implements ProfileDataCallback, Data
             return;
         }
 
-        final int state = data.getIntValue(Data.FORMAT_UINT16, 0);
-        onOccupancyStateChanged(device, state);
+        byte[] dataBytes = data.getValue();
+        byte[] array = { 0x00, 0x00, dataBytes[0], dataBytes[1] };
+        final Integer occupancy = ByteBuffer.wrap(array).getInt();
+        onOccupancyStateChanged(device, occupancy);
     }
 }
