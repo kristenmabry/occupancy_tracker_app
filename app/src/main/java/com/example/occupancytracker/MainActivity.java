@@ -21,6 +21,9 @@ public class MainActivity extends AppCompatActivity {
         if (android.os.Build.VERSION.SDK_INT <= 30) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[] { Manifest.permission.BLUETOOTH, Manifest.permission.BLUETOOTH_ADMIN }, 1);
         }
+        else {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[] { Manifest.permission.BLUETOOTH_CONNECT }, 1);
+        }
     }
 
     @Override
