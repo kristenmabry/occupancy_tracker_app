@@ -1,13 +1,17 @@
 package com.example.occupancytracker;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -23,14 +27,20 @@ public class OccupancyManager extends ObservableBleManager {
     private final static UUID LBS_UUID_OCCUPANCY_INT = UUID.fromString("9fed1401-fc85-41c0-be7b-0c6ec45d960e");
     /** Ceiling Height characteristic UUID. */
     private final static UUID LBS_UUID_HEIGHT_INT = UUID.fromString("9fed1402-fc85-41c0-be7b-0c6ec45d960e");
+    /** Battery Level characteristic UUID. */
+    private final static UUID LBS_UUID_BATTERY_INT = UUID.fromString("9fed1403-fc85-41c0-be7b-0c6ec45d960e");
 
     private final MutableLiveData<Integer> occupancyState = new MutableLiveData<>();
     private final MutableLiveData<Integer> ceilingHeightState = new MutableLiveData<>();
+    private final MutableLiveData<Integer> batteryLevelState = new MutableLiveData<>();
 
     private BluetoothGattCharacteristic occupancyCharacteristic;
     private BluetoothGattCharacteristic ceilingHeightCharacteristic;
+    private BluetoothGattCharacteristic batteryLevelCharacteristic;
+    private BluetoothGatt bluetoothGatt;
     private boolean supported;
     private Integer ceilingHeight;
+    private Integer batteryLevel;
 
     public OccupancyManager(@NonNull final Context context) {
         super(context);
@@ -39,8 +49,13 @@ public class OccupancyManager extends ObservableBleManager {
     public final LiveData<Integer> getOccupancyState() {
         return occupancyState;
     }
+
     public final LiveData<Integer> getCeilingHeightState() {
         return ceilingHeightState;
+    }
+
+    public final LiveData<Integer> getBatteryLevelState() {
+        return batteryLevelState;
     }
 
     @NonNull
@@ -70,10 +85,10 @@ public class OccupancyManager extends ObservableBleManager {
      * Otherwise, the {@link OccupancyDataCallback#onInvalidDataReceived(BluetoothDevice, Data)}
      * will be called with the data received.
      */
-    private	final OccupancyDataCallback occupancyCallback = new OccupancyDataCallback() {
+    private final OccupancyDataCallback occupancyCallback = new OccupancyDataCallback() {
         @Override
         public void onOccupancyStateChanged(@NonNull final BluetoothDevice device,
-                                         final Integer total) {
+                                            final Integer total) {
             log(Log.VERBOSE, "Occupancy: " + total.toString());
             occupancyState.setValue(total);
         }
@@ -88,10 +103,27 @@ public class OccupancyManager extends ObservableBleManager {
     private final OccupancyHeightDataCallback ceilingHeightCallback = new OccupancyHeightDataCallback() {
         @Override
         public void onCeilingHeightStateChanged(@NonNull final BluetoothDevice device,
-                                      final Integer height) {
+                                                final Integer height) {
             ceilingHeight = height;
             log(Log.VERBOSE, "Ceiling height: " + height.toString() + " mm");
             ceilingHeightState.setValue(height);
+        }
+
+        @Override
+        public void onInvalidDataReceived(@NonNull final BluetoothDevice device,
+                                          @NonNull final Data data) {
+            // Data can only invalid if we read them. We assume the app always sends correct data.
+            log(Log.WARN, "Invalid data received: " + data);
+        }
+    };
+
+    private final BatteryLevelDataCallback batteryLevelCallback = new BatteryLevelDataCallback() {
+        @Override
+        public void onBatteryLevelStateChanged(@NonNull final BluetoothDevice device,
+                                                final Integer battery) {
+            batteryLevel = battery;
+            log(Log.VERBOSE, "Battery level: " + battery.toString() + "%");
+            batteryLevelState.setValue(battery);
         }
 
         @Override
@@ -112,15 +144,18 @@ public class OccupancyManager extends ObservableBleManager {
             setNotificationCallback(occupancyCharacteristic).with(occupancyCallback);
             readCharacteristic(occupancyCharacteristic).with(occupancyCallback).enqueue();
             readCharacteristic(ceilingHeightCharacteristic).with(ceilingHeightCallback).enqueue();
+            readCharacteristic(batteryLevelCharacteristic).with(batteryLevelCallback).enqueue();
             enableNotifications(occupancyCharacteristic).enqueue();
         }
 
         @Override
         public boolean isRequiredServiceSupported(@NonNull final BluetoothGatt gatt) {
+            bluetoothGatt = gatt;
             final BluetoothGattService service = gatt.getService(LBS_UUID_SERVICE);
             if (service != null) {
                 occupancyCharacteristic = service.getCharacteristic(LBS_UUID_OCCUPANCY_INT);
                 ceilingHeightCharacteristic = service.getCharacteristic(LBS_UUID_HEIGHT_INT);
+                batteryLevelCharacteristic = service.getCharacteristic(LBS_UUID_BATTERY_INT);
             }
 
             boolean writeRequest = false;
@@ -130,13 +165,14 @@ public class OccupancyManager extends ObservableBleManager {
             }
 
             supported = occupancyCharacteristic != null && writeRequest;
-            supported = occupancyCharacteristic != null;
             return supported;
         }
 
         @Override
         protected void onServicesInvalidated() {
             occupancyCharacteristic = null;
+            ceilingHeightCharacteristic = null;
+            batteryLevelCharacteristic = null;
         }
     }
 
@@ -150,9 +186,9 @@ public class OccupancyManager extends ObservableBleManager {
             return;
 
         log(Log.VERBOSE, "Setting height to " + height.toString() + "...");
-        byte[] array = new byte[] {
-                (byte)((height >> 8) & 0xff),
-                (byte)(height & 0xff),
+        byte[] array = new byte[]{
+                (byte) ((height >> 8) & 0xff),
+                (byte) (height & 0xff),
         };
         writeCharacteristic(
                 ceilingHeightCharacteristic,
@@ -167,9 +203,9 @@ public class OccupancyManager extends ObservableBleManager {
             return;
 
         log(Log.VERBOSE, "Setting occupancy to " + newOccupancy.toString() + "...");
-        byte[] array = new byte[] {
-                (byte)((newOccupancy >> 8) & 0xff),
-                (byte)(newOccupancy & 0xff),
+        byte[] array = new byte[]{
+                (byte) ((newOccupancy >> 8) & 0xff),
+                (byte) (newOccupancy & 0xff),
         };
         writeCharacteristic(
                 occupancyCharacteristic,
@@ -178,4 +214,9 @@ public class OccupancyManager extends ObservableBleManager {
         ).with(occupancyCallback).enqueue();
     }
 
+//    public int getRssi() {
+//        String intentAction = ACTION_GATT_CONNECTED;
+//        @SuppressLint("MissingPermission") boolean rssiStatus = bluetoothGatt.readRemoteRssi();
+//        broadcastUpdate(intentAction);
+//    }
 }

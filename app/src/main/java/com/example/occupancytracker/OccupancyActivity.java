@@ -53,6 +53,10 @@ public class OccupancyActivity extends AppCompatActivity {
                 viewModel.connect(device);
                 viewModel.getOccupancyState().observe(OccupancyActivity.this, total -> binding.occupancyNumber.setText(total.toString()));
                 viewModel.getCeilingHeightState().observe(OccupancyActivity.this, height -> ceilingHeight = (float) (height / 1000.0));
+                viewModel.getBatteryLevelState().observe(OccupancyActivity.this, battery -> {
+                    binding.batteryPercent.setText(battery + "%");
+                    setBatteryIcon(battery);
+                });
                 viewModel.getConnectionState().observe(OccupancyActivity.this, state -> {
                       switch (state.getState()) {
                           case CONNECTING:
@@ -191,5 +195,19 @@ public class OccupancyActivity extends AppCompatActivity {
 
     public void exportData(View view) {
 
+    }
+
+    private void setBatteryIcon(int level) {
+        if (level >= 80) {
+            binding.batteryImage.setBackgroundResource(R.drawable.battery_5);
+        } else if (level >= 60) {
+            binding.batteryImage.setBackgroundResource(R.drawable.battery_4);
+        } else if (level >= 40) {
+            binding.batteryImage.setBackgroundResource(R.drawable.battery_3);
+        } else if (level >= 20) {
+            binding.batteryImage.setBackgroundResource(R.drawable.battery_2);
+        } else {
+            binding.batteryImage.setBackgroundResource(R.drawable.battery_1);
+        }
     }
 }

@@ -34,6 +34,9 @@ public class OccupancyViewModel extends AndroidViewModel {
     public LiveData<Integer> getCeilingHeightState() {
         return occupancyManager.getCeilingHeightState();
     }
+    public final LiveData<Integer> getBatteryLevelState() {
+        return occupancyManager.getBatteryLevelState();
+    }
 
     /**
      * Connect to the given peripheral.
