@@ -1,13 +1,22 @@
 package com.example.occupancytracker;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.bluetooth.BluetoothDevice;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.example.occupancytracker.databinding.ActivityOccupancyBinding;
 
@@ -19,12 +28,14 @@ public class OccupancyActivity extends AppCompatActivity {
 
     private OccupancyViewModel viewModel;
     private ActivityOccupancyBinding binding;
+    private Float ceilingHeight = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityOccupancyBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        binding.exportButton.setEnabled(false);
         this.initToolbar();
 
         final Intent intent = getIntent();
@@ -37,62 +48,47 @@ public class OccupancyActivity extends AppCompatActivity {
 
         // Configure the view model.
         viewModel = new ViewModelProvider(this).get(OccupancyViewModel.class);
-        viewModel.connect(device);
-
-        // Set up views.
-//        binding.ledSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> viewModel.setLedState(isChecked));
-//        binding.infoNotSupported.actionRetry.setOnClickListener(v -> viewModel.reconnect());
-//        binding.infoTimeout.actionRetry.setOnClickListener(v -> viewModel.reconnect());
-
-//        viewModel.getConnectionState().observe(this, state -> {
-//            switch (state.getState()) {
-//                case CONNECTING:
-//                    binding.progressContainer.setVisibility(View.VISIBLE);
-//                    binding.infoNotSupported.container.setVisibility(View.GONE);
-//                    binding.infoTimeout.container.setVisibility(View.GONE);
-//                    binding.connectionState.setText(R.string.state_connecting);
-//                    break;
-//                case INITIALIZING:
-//                    binding.connectionState.setText(R.string.state_initializing);
-//                    break;
-//                case READY:
-//                    binding.progressContainer.setVisibility(View.GONE);
-//                    binding.deviceContainer.setVisibility(View.VISIBLE);
-//                    onConnectionStateChanged(true);
-//                    break;
-//                case DISCONNECTED:
-//                    if (state instanceof ConnectionState.Disconnected) {
-//                        binding.deviceContainer.setVisibility(View.GONE);
-//                        binding.progressContainer.setVisibility(View.GONE);
-//                        final ConnectionState.Disconnected stateWithReason = (ConnectionState.Disconnected) state;
-//                        if (stateWithReason.getReason() == ConnectionObserver.REASON_NOT_SUPPORTED) {
-//                            binding.infoNotSupported.container.setVisibility(View.VISIBLE);
-//                        } else {
-//                            binding.infoTimeout.container.setVisibility(View.VISIBLE);
-//                        }
-//                    }
-//                    // fallthrough
-//                case DISCONNECTING:
-//                    onConnectionStateChanged(false);
-//                    break;
-//            }
-//        });
-//        viewModel.getLedState().observe(this, isOn -> {
-//            binding.ledState.setText(isOn ? R.string.turn_on : R.string.turn_off);
-//            binding.ledSwitch.setChecked(isOn);
-//        });
-        viewModel.getOccupancyState().observe(this,
-                total -> binding.occupancyNumber.setText(total.toString()));
+        runOnUiThread(new Runnable() {
+              public void run() {
+                viewModel.connect(device);
+                viewModel.getOccupancyState().observe(OccupancyActivity.this, total -> binding.occupancyNumber.setText(total.toString()));
+                viewModel.getCeilingHeightState().observe(OccupancyActivity.this, height -> ceilingHeight = (float) (height / 1000.0));
+                viewModel.getConnectionState().observe(OccupancyActivity.this, state -> {
+                      switch (state.getState()) {
+                          case CONNECTING:
+                              break;
+                          case INITIALIZING:
+                              break;
+                          case READY:
+                              onConnectionStateChanged(true);
+                              break;
+                          case DISCONNECTED:
+                              if (state instanceof ConnectionState.Disconnected) {
+                                  final ConnectionState.Disconnected stateWithReason = (ConnectionState.Disconnected) state;
+                                  Log.v("DISCONNECT", String.valueOf(stateWithReason.getReason()));
+                                  if (stateWithReason.getReason() == ConnectionObserver.REASON_TIMEOUT) {
+                                      Toast.makeText(OccupancyActivity.this, "Error: Timed out trying to connect to device", Toast.LENGTH_SHORT).show();
+                                  } else if (stateWithReason.getReason() != ConnectionObserver.REASON_UNKNOWN) {
+                                      viewModel.reconnect();
+                                  }
+                              }
+                          case DISCONNECTING:
+                              onConnectionStateChanged(false);
+                              break;
+                      }
+              });
+              }
+          });
     }
 
     private void initToolbar() {
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-//        getSupportActionBar().setTitle(getResources().getString(R.string.bluetooth_devices));
         binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                viewModel.disconnect();
                 Intent intent = new Intent(OccupancyActivity.this, MainActivity.class);
                 startActivity(intent);
             }
@@ -102,8 +98,15 @@ public class OccupancyActivity extends AppCompatActivity {
     private void onConnectionStateChanged(final boolean connected) {
         binding.refresh.setEnabled(connected);
         if (!connected) {
-            binding.batteryPercent.setText("0%");
-            binding.occupancyNumber.setText("0%");
+//            binding.batteryPercent.setText("0%");
+            binding.occupancyNumber.setText("--");
+            binding.optionsButton.setEnabled(false);
+            binding.exportButton.setEnabled(false);
+        }
+        else {
+            Toast.makeText(this, "Successfully connected to device", Toast.LENGTH_SHORT).show();
+            binding.optionsButton.setEnabled(true);
+//            binding.exportButton.setEnabled(true);
         }
     }
 
@@ -112,7 +115,78 @@ public class OccupancyActivity extends AppCompatActivity {
     }
 
     public void openOptionsPopup(View view) {
+        runOnUiThread(new Runnable() {
+              public void run() {
+            AlertDialog.Builder builder = new AlertDialog.Builder(OccupancyActivity.this);
+            builder.setTitle("Options");
 
+            LinearLayout lila1= new LinearLayout(OccupancyActivity.this);
+            lila1.setOrientation(LinearLayout.VERTICAL);
+            final EditText ceilingHeightInput = new EditText(OccupancyActivity.this);
+            ceilingHeightInput.setInputType(InputType.TYPE_CLASS_NUMBER|InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            ceilingHeightInput.setHint(getResources().getString(R.string.ceiling_height));
+            if (ceilingHeight != null) {
+                ceilingHeightInput.setText(ceilingHeight.toString());
+            }
+            final EditText resetOccupancyInput = new EditText(OccupancyActivity.this);
+            resetOccupancyInput.setInputType(InputType.TYPE_CLASS_NUMBER);
+            resetOccupancyInput.setHint(getResources().getString(R.string.reset_occupancy));
+            lila1.addView(ceilingHeightInput);
+            lila1.addView(resetOccupancyInput);
+            builder.setView(lila1);
+
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    final String ceilingHeight = ceilingHeightInput.getText().toString();
+                    if (!ceilingHeight.equals("")) {
+                        viewModel.setCeilingHeight((int)(Float.parseFloat(ceilingHeight) * 1000));
+                    }
+                    final String occupancySubmit = resetOccupancyInput.getText().toString();
+                    if (!occupancySubmit.equals("")) {
+                        viewModel.setOccupancy(Integer.parseInt(occupancySubmit));
+                    }
+                }
+            });
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+
+            AlertDialog dialog = builder.show();
+            ceilingHeightInput.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    final String ceilingHeight = ceilingHeightInput.getText().toString();
+                    Button okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                    try {
+                        if (Float.parseFloat(ceilingHeight) > 4.0) {
+                            ceilingHeightInput.setError("Ceiling height must be 4.0 m or less");
+                            okButton.setEnabled(false);
+                        } else {
+                            ceilingHeightInput.setError(null);
+                            okButton.setEnabled(true);
+                        }
+                    } catch (NumberFormatException e) {
+                        ceilingHeightInput.setError(null);
+                        okButton.setEnabled(true);
+                    }
+                }
+            });
+              }
+        });
     }
 
     public void exportData(View view) {

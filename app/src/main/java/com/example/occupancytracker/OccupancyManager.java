@@ -21,14 +21,16 @@ public class OccupancyManager extends ObservableBleManager {
     public final static UUID LBS_UUID_SERVICE = UUID.fromString("9fed1400-fc85-41c0-be7b-0c6ec45d960e");
     /** Occupancy Number characteristic UUID. */
     private final static UUID LBS_UUID_OCCUPANCY_INT = UUID.fromString("9fed1401-fc85-41c0-be7b-0c6ec45d960e");
-    /** LED characteristic UUID. */
-    private final static UUID LBS_UUID_LED_CHAR = UUID.fromString("00001525-1212-efde-1523-785feabcd123");
+    /** Ceiling Height characteristic UUID. */
+    private final static UUID LBS_UUID_HEIGHT_INT = UUID.fromString("9fed1402-fc85-41c0-be7b-0c6ec45d960e");
 
     private final MutableLiveData<Integer> occupancyState = new MutableLiveData<>();
+    private final MutableLiveData<Integer> ceilingHeightState = new MutableLiveData<>();
 
     private BluetoothGattCharacteristic occupancyCharacteristic;
+    private BluetoothGattCharacteristic ceilingHeightCharacteristic;
     private boolean supported;
-    private boolean ledOn;
+    private Integer ceilingHeight;
 
     public OccupancyManager(@NonNull final Context context) {
         super(context);
@@ -36,6 +38,9 @@ public class OccupancyManager extends ObservableBleManager {
 
     public final LiveData<Integer> getOccupancyState() {
         return occupancyState;
+    }
+    public final LiveData<Integer> getCeilingHeightState() {
+        return ceilingHeightState;
     }
 
     @NonNull
@@ -69,13 +74,30 @@ public class OccupancyManager extends ObservableBleManager {
         @Override
         public void onOccupancyStateChanged(@NonNull final BluetoothDevice device,
                                          final Integer total) {
-            Log.i("OccupancyDataCallback", "Occupancy: " + total.toString());
+            log(Log.VERBOSE, "Occupancy: " + total.toString());
             occupancyState.setValue(total);
         }
 
         @Override
         public void onInvalidDataReceived(@NonNull final BluetoothDevice device,
                                           @NonNull final Data data) {
+            log(Log.WARN, "Invalid data received: " + data);
+        }
+    };
+
+    private final OccupancyHeightDataCallback ceilingHeightCallback = new OccupancyHeightDataCallback() {
+        @Override
+        public void onCeilingHeightStateChanged(@NonNull final BluetoothDevice device,
+                                      final Integer height) {
+            ceilingHeight = height;
+            log(Log.VERBOSE, "Ceiling height: " + height.toString() + " mm");
+            ceilingHeightState.setValue(height);
+        }
+
+        @Override
+        public void onInvalidDataReceived(@NonNull final BluetoothDevice device,
+                                          @NonNull final Data data) {
+            // Data can only invalid if we read them. We assume the app always sends correct data.
             log(Log.WARN, "Invalid data received: " + data);
         }
     };
@@ -89,6 +111,7 @@ public class OccupancyManager extends ObservableBleManager {
         protected void initialize() {
             setNotificationCallback(occupancyCharacteristic).with(occupancyCallback);
             readCharacteristic(occupancyCharacteristic).with(occupancyCallback).enqueue();
+            readCharacteristic(ceilingHeightCharacteristic).with(ceilingHeightCallback).enqueue();
             enableNotifications(occupancyCharacteristic).enqueue();
         }
 
@@ -97,15 +120,16 @@ public class OccupancyManager extends ObservableBleManager {
             final BluetoothGattService service = gatt.getService(LBS_UUID_SERVICE);
             if (service != null) {
                 occupancyCharacteristic = service.getCharacteristic(LBS_UUID_OCCUPANCY_INT);
+                ceilingHeightCharacteristic = service.getCharacteristic(LBS_UUID_HEIGHT_INT);
             }
 
-//            boolean writeRequest = false;
-//            if (ledCharacteristic != null) {
-//                final int ledProperties = ledCharacteristic.getProperties();
-//                writeRequest = (ledProperties & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0;
-//            }
+            boolean writeRequest = false;
+            if (ceilingHeightCharacteristic != null) {
+                final int heightProperties = ceilingHeightCharacteristic.getProperties();
+                writeRequest = (heightProperties & BluetoothGattCharacteristic.PROPERTY_WRITE) > 0;
+            }
 
-//            supported = occupancyCharacteristic != null && writeRequest;
+            supported = occupancyCharacteristic != null && writeRequest;
             supported = occupancyCharacteristic != null;
             return supported;
         }
@@ -116,26 +140,42 @@ public class OccupancyManager extends ObservableBleManager {
         }
     }
 
-//    /**
-//     * Sends a request to the device to turn the LED on or off.
-//     *
-//     * @param on true to turn the LED on, false to turn it off.
-//     */
-//    public void turnLed(final boolean on) {
-//        // Are we connected?
-//        if (ledCharacteristic == null)
-//            return;
-//
-//        // No need to change?
-//        if (ledOn == on)
-//            return;
-//
-//        log(Log.VERBOSE, "Turning LED " + (on ? "ON" : "OFF") + "...");
-//        writeCharacteristic(
-//                ledCharacteristic,
-//                BlinkyLED.turn(on),
-//                BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-//        ).with(ledCallback).enqueue();
-//    }
+    public void setCeilingHeight(final Integer height) {
+        // Are we connected?
+        if (ceilingHeightCharacteristic == null)
+            return;
+
+        // No need to change?
+        if (ceilingHeight == height)
+            return;
+
+        log(Log.VERBOSE, "Setting height to " + height.toString() + "...");
+        byte[] array = new byte[] {
+                (byte)((height >> 8) & 0xff),
+                (byte)(height & 0xff),
+        };
+        writeCharacteristic(
+                ceilingHeightCharacteristic,
+                array,
+                BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+        ).with(ceilingHeightCallback).enqueue();
+    }
+
+    public void setOccupancy(final Integer newOccupancy) {
+        // Are we connected?
+        if (occupancyCharacteristic == null)
+            return;
+
+        log(Log.VERBOSE, "Setting occupancy to " + newOccupancy.toString() + "...");
+        byte[] array = new byte[] {
+                (byte)((newOccupancy >> 8) & 0xff),
+                (byte)(newOccupancy & 0xff),
+        };
+        writeCharacteristic(
+                occupancyCharacteristic,
+                array,
+                BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+        ).with(occupancyCallback).enqueue();
+    }
 
 }

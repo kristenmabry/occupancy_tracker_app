@@ -31,6 +31,9 @@ public class OccupancyViewModel extends AndroidViewModel {
     public LiveData<Integer> getOccupancyState() {
         return occupancyManager.getOccupancyState();
     }
+    public LiveData<Integer> getCeilingHeightState() {
+        return occupancyManager.getCeilingHeightState();
+    }
 
     /**
      * Connect to the given peripheral.
@@ -63,7 +66,7 @@ public class OccupancyViewModel extends AndroidViewModel {
     /**
      * Disconnect from peripheral.
      */
-    private void disconnect() {
+    public void disconnect() {
         device = null;
         if (connectRequest != null) {
             connectRequest.cancelPendingConnection();
@@ -72,14 +75,13 @@ public class OccupancyViewModel extends AndroidViewModel {
         }
     }
 
-//    /**
-//     * Sends a command to turn ON or OFF the LED on the nRF5 DK.
-//     *
-//     * @param on true to turn the LED on, false to turn it OFF.
-//     */
-//    public void setLedState(final boolean on) {
-//        occupancyManager.turnLed(on);
-//    }
+    public void setCeilingHeight(final Integer height) {
+        occupancyManager.setCeilingHeight(height);
+    }
+
+    public void setOccupancy(final Integer occupancy) {
+        occupancyManager.setOccupancy(occupancy);
+    }
 
     @Override
     protected void onCleared() {
