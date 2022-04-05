@@ -93,21 +93,22 @@
             android:id="@+id/options_button"
             android:onClick="openOptionsPopup"
             android:text="@string/options"
-            android:layout_width="160dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:theme="@style/buttonStyle"
+            android:layout_marginStart="@dimen/default_margin"
             android:layout_marginEnd="@dimen/default_margin"
             android:textSize="15sp"
             />
 
-        <Button
-            android:id="@+id/export_button"
-            android:onClick="exportData"
-            android:layout_width="160dp"
-            android:layout_height="wrap_content"
-            android:text="@string/export_data"
-            android:textSize="15sp"
-            android:theme="@style/buttonStyle" />
+<!--        <Button-->
+<!--            android:id="@+id/export_button"-->
+<!--            android:onClick="exportData"-->
+<!--            android:layout_width="160dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="@string/export_data"-->
+<!--            android:textSize="15sp"-->
+<!--            android:theme="@style/buttonStyle" />-->
     </LinearLayout>
 
 </RelativeLayout>

@@ -35,7 +35,7 @@ public class OccupancyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityOccupancyBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        binding.exportButton.setEnabled(false);
+//        binding.exportButton.setEnabled(false);
         this.initToolbar();
 
         final Intent intent = getIntent();
@@ -105,7 +105,7 @@ public class OccupancyActivity extends AppCompatActivity {
 //            binding.batteryPercent.setText("0%");
             binding.occupancyNumber.setText("--");
             binding.optionsButton.setEnabled(false);
-            binding.exportButton.setEnabled(false);
+//            binding.exportButton.setEnabled(false);
         }
         else {
             Toast.makeText(this, "Successfully connected to device", Toast.LENGTH_SHORT).show();
@@ -199,15 +199,15 @@ public class OccupancyActivity extends AppCompatActivity {
 
     private void setBatteryIcon(int level) {
         if (level >= 80) {
-            binding.batteryImage.setBackgroundResource(R.drawable.battery_5);
+            binding.batteryImage.setImageResource(R.drawable.battery_5);
         } else if (level >= 60) {
-            binding.batteryImage.setBackgroundResource(R.drawable.battery_4);
+            binding.batteryImage.setImageResource(R.drawable.battery_4);
         } else if (level >= 40) {
-            binding.batteryImage.setBackgroundResource(R.drawable.battery_3);
+            binding.batteryImage.setImageResource(R.drawable.battery_3);
         } else if (level >= 20) {
-            binding.batteryImage.setBackgroundResource(R.drawable.battery_2);
+            binding.batteryImage.setImageResource(R.drawable.battery_2);
         } else {
-            binding.batteryImage.setBackgroundResource(R.drawable.battery_1);
+            binding.batteryImage.setImageResource(R.drawable.battery_1);
         }
     }
 }

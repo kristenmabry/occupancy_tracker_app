@@ -28,9 +28,7 @@ public abstract class BatteryLevelDataCallback implements ProfileDataCallback, D
             return;
         }
 
-        byte[] dataBytes = data.getValue();
-        byte[] array = { 0x00, 0x00, dataBytes[0], dataBytes[1] };
-        final Integer adc_value = ByteBuffer.wrap(array).getInt();
-        onBatteryLevelStateChanged(device, adc_value / 1024 * 100);
+        int battery = data.getIntValue(Data.FORMAT_UINT8, 0);
+        onBatteryLevelStateChanged(device, battery);
     }
 }
