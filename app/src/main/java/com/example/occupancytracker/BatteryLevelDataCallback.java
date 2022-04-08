@@ -23,7 +23,7 @@ public abstract class BatteryLevelDataCallback implements ProfileDataCallback, D
     }
 
     private void parse(@NonNull final BluetoothDevice device, @NonNull final Data data) {
-        if (data.size() != 2) {
+        if (data.size() != 1) {
             onInvalidDataReceived(device, data);
             return;
         }

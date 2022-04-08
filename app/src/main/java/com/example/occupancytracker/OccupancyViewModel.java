@@ -91,4 +91,8 @@ public class OccupancyViewModel extends AndroidViewModel {
         super.onCleared();
         disconnect();
     }
+
+    public void getBatteryLevel() {
+        occupancyManager.getBatteryLevel();
+    }
 }

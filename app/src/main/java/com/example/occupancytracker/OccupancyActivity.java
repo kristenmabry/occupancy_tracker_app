@@ -99,6 +99,12 @@ public class OccupancyActivity extends AppCompatActivity {
         });
     }
 
+//    @Override
+//    public void onBackPressed() {
+//        viewModel.disconnect();
+//        super.onBackPressed();
+//    }
+
     private void onConnectionStateChanged(final boolean connected) {
         binding.refresh.setEnabled(connected);
         if (!connected) {
@@ -114,8 +120,8 @@ public class OccupancyActivity extends AppCompatActivity {
         }
     }
 
-    public void refreshData(View view) {
-
+    public void refreshBattery(View view) {
+        viewModel.getBatteryLevel();
     }
 
     public void openOptionsPopup(View view) {

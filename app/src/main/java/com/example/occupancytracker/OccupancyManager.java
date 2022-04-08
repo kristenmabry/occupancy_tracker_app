@@ -214,6 +214,10 @@ public class OccupancyManager extends ObservableBleManager {
         ).with(occupancyCallback).enqueue();
     }
 
+    public void getBatteryLevel() {
+        readCharacteristic(batteryLevelCharacteristic).with(batteryLevelCallback).enqueue();
+    }
+
 //    public int getRssi() {
 //        String intentAction = ACTION_GATT_CONNECTED;
 //        @SuppressLint("MissingPermission") boolean rssiStatus = bluetoothGatt.readRemoteRssi();
