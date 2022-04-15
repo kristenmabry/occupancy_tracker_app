@@ -31,7 +31,10 @@ public abstract class OccupancyDataCallback implements ProfileDataCallback, Data
 
         byte[] dataBytes = data.getValue();
         byte[] array = { 0x00, 0x00, dataBytes[0], dataBytes[1] };
-        final Integer occupancy = ByteBuffer.wrap(array).getInt();
+        Integer occupancy = ByteBuffer.wrap(array).getInt();
+        if (occupancy >= Math.pow(2, 15)) {
+            occupancy -= (int)Math.pow(2, 16);
+        }
         onOccupancyStateChanged(device, occupancy);
     }
 }
