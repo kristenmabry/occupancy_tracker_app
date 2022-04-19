@@ -11,8 +11,7 @@ import no.nordicsemi.android.ble.callback.profile.ProfileDataCallback;
 import no.nordicsemi.android.ble.data.Data;
 
 @SuppressWarnings("ConstantConditions")
-public abstract class OccupancyDataCallback implements ProfileDataCallback, DataSentCallback, OccupancyCallback {
-
+public abstract class BatteryLevelDataCallback implements ProfileDataCallback, DataSentCallback, BatteryLevelCallback {
     @Override
     public void onDataReceived(@NonNull final BluetoothDevice device, @NonNull final Data data) {
         parse(device, data);
@@ -23,18 +22,13 @@ public abstract class OccupancyDataCallback implements ProfileDataCallback, Data
         parse(device, data);
     }
 
-    public void parse(@NonNull final BluetoothDevice device, @NonNull final Data data) {
-        if (data.size() != 2) {
+    private void parse(@NonNull final BluetoothDevice device, @NonNull final Data data) {
+        if (data.size() != 1) {
             onInvalidDataReceived(device, data);
             return;
         }
 
-        byte[] dataBytes = data.getValue();
-        byte[] array = { 0x00, 0x00, dataBytes[0], dataBytes[1] };
-        Integer occupancy = ByteBuffer.wrap(array).getInt();
-        if (occupancy >= Math.pow(2, 15)) {
-            occupancy -= (int)Math.pow(2, 16);
-        }
-        onOccupancyStateChanged(device, occupancy);
+        int battery = data.getIntValue(Data.FORMAT_UINT8, 0);
+        onBatteryLevelStateChanged(device, battery);
     }
 }

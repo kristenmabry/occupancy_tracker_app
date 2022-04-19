@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="default_margin">40dp</dimen>
+    <dimen name="default_font_size">40sp</dimen>
+    <dimen name="selected_box">15dp</dimen>
+    <dimen name="top_margin">60dp</dimen>
+    <dimen name="icon_size">400dp</dimen>
+    <dimen name="title_size">100sp</dimen>
+    <dimen name="button_margin">30dp</dimen>
+    <dimen name="battery_size">100dp</dimen>
+    <dimen name="battery_margin">30dp</dimen>
+    <dimen name="percent_margin">45dp</dimen>
+    <dimen name="percent_size">60sp</dimen>
+</resources>

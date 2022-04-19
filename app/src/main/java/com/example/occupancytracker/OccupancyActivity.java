@@ -35,7 +35,7 @@ public class OccupancyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityOccupancyBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        binding.exportButton.setEnabled(false);
+//        binding.exportButton.setEnabled(false);
         this.initToolbar();
 
         final Intent intent = getIntent();
@@ -53,6 +53,10 @@ public class OccupancyActivity extends AppCompatActivity {
                 viewModel.connect(device);
                 viewModel.getOccupancyState().observe(OccupancyActivity.this, total -> binding.occupancyNumber.setText(total.toString()));
                 viewModel.getCeilingHeightState().observe(OccupancyActivity.this, height -> ceilingHeight = (float) (height / 1000.0));
+                viewModel.getBatteryLevelState().observe(OccupancyActivity.this, battery -> {
+                    binding.batteryPercent.setText(battery + "%");
+                    setBatteryIcon(battery);
+                });
                 viewModel.getConnectionState().observe(OccupancyActivity.this, state -> {
                       switch (state.getState()) {
                           case CONNECTING:
@@ -95,13 +99,19 @@ public class OccupancyActivity extends AppCompatActivity {
         });
     }
 
+//    @Override
+//    public void onBackPressed() {
+//        viewModel.disconnect();
+//        super.onBackPressed();
+//    }
+
     private void onConnectionStateChanged(final boolean connected) {
         binding.refresh.setEnabled(connected);
         if (!connected) {
 //            binding.batteryPercent.setText("0%");
             binding.occupancyNumber.setText("--");
             binding.optionsButton.setEnabled(false);
-            binding.exportButton.setEnabled(false);
+//            binding.exportButton.setEnabled(false);
         }
         else {
             Toast.makeText(this, "Successfully connected to device", Toast.LENGTH_SHORT).show();
@@ -110,8 +120,8 @@ public class OccupancyActivity extends AppCompatActivity {
         }
     }
 
-    public void refreshData(View view) {
-
+    public void refreshBattery(View view) {
+        viewModel.getBatteryLevel();
     }
 
     public void openOptionsPopup(View view) {
@@ -191,5 +201,19 @@ public class OccupancyActivity extends AppCompatActivity {
 
     public void exportData(View view) {
 
+    }
+
+    private void setBatteryIcon(int level) {
+        if (level >= 80) {
+            binding.batteryImage.setImageResource(R.drawable.battery_5);
+        } else if (level >= 60) {
+            binding.batteryImage.setImageResource(R.drawable.battery_4);
+        } else if (level >= 40) {
+            binding.batteryImage.setImageResource(R.drawable.battery_3);
+        } else if (level >= 20) {
+            binding.batteryImage.setImageResource(R.drawable.battery_2);
+        } else {
+            binding.batteryImage.setImageResource(R.drawable.battery_1);
+        }
     }
 }

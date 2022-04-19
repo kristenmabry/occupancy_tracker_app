@@ -3,4 +3,12 @@
     <dimen name="default_margin">20dp</dimen>
     <dimen name="default_font_size">20sp</dimen>
     <dimen name="selected_box">15dp</dimen>
+    <dimen name="top_margin">30dp</dimen>
+    <dimen name="icon_size">150dp</dimen>
+    <dimen name="title_size">60sp</dimen>
+    <dimen name="button_margin">10dp</dimen>
+    <dimen name="battery_size">50dp</dimen>
+    <dimen name="battery_margin">10dp</dimen>
+    <dimen name="percent_margin">15dp</dimen>
+    <dimen name="percent_size">30sp</dimen>
 </resources>
