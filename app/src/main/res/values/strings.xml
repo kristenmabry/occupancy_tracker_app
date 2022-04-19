@@ -13,4 +13,6 @@
     <string name="shared_preferences_file_key">com.example.occupancytracker.bluetooth</string>
     <string name="ceiling_height">Ceiling Height (m)</string>
     <string name="reset_occupancy">Reset Occupancy Number</string>
+    <string name="device_off">Device Off</string>
+    <string name="device_on">Device On</string>
 </resources>

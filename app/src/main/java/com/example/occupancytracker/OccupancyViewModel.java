@@ -37,6 +37,9 @@ public class OccupancyViewModel extends AndroidViewModel {
     public final LiveData<Integer> getBatteryLevelState() {
         return occupancyManager.getBatteryLevelState();
     }
+    public LiveData<Boolean> getPowerModeState() {
+        return occupancyManager.getPowerModeState();
+    }
 
     /**
      * Connect to the given peripheral.
@@ -84,6 +87,10 @@ public class OccupancyViewModel extends AndroidViewModel {
 
     public void setOccupancy(final Integer occupancy) {
         occupancyManager.setOccupancy(occupancy);
+    }
+
+    public void setPowerMode(final boolean powerOn) {
+        occupancyManager.setPowerMode(powerOn);
     }
 
     @Override

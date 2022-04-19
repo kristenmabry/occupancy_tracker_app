@@ -15,4 +15,8 @@
         <item name="colorControlNormal">@color/colorOnPrimary</item>
         <item name="android:textSize">@dimen/default_font_size</item>
     </style>
+    <style name="switchStyle" parent="@style/Widget.AppCompat.CompoundButton.Switch">
+        <item name="android:colorControlActivated">@color/colorSecondary</item>
+        <item name="android:colorForeground">@color/colorPrimaryVariant</item>
+    </style>
 </resources>

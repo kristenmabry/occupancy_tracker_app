@@ -49,16 +49,38 @@
             android:textColor="@color/colorPrimary"
             android:textSize="@dimen/percent_size" />
 
-        <ImageView
-            android:id="@+id/refresh"
-            android:layout_width="@dimen/battery_size"
+<!--        <ImageView-->
+<!--            android:id="@+id/refresh"-->
+<!--            android:layout_width="@dimen/battery_size"-->
+<!--            android:layout_height="@dimen/battery_size"-->
+<!--            android:layout_alignParentEnd="true"-->
+<!--            android:layout_marginTop="@dimen/button_margin"-->
+<!--            android:layout_marginEnd="@dimen/default_margin"-->
+<!--            android:background="?attr/selectableItemBackgroundBorderless"-->
+<!--            android:clickable="true"-->
+<!--            android:src="@drawable/refresh_circle" />-->
+
+        <TextView
+            android:id="@+id/toggle_caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/button_margin"
+            android:layout_marginTop="@dimen/switch_caption_margin"
+            android:layout_toLeftOf="@id/toggle"
+            android:textSize="@dimen/default_font_size"
+            android:textColor="@color/colorPrimary"
+            android:gravity="center_horizontal"
+            />
+        <Switch
+            android:id="@+id/toggle"
+            android:switchMinWidth="@dimen/battery_size"
+            android:layout_width="wrap_content"
             android:layout_height="@dimen/battery_size"
             android:layout_alignParentEnd="true"
             android:layout_marginTop="@dimen/button_margin"
             android:layout_marginEnd="@dimen/default_margin"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:src="@drawable/refresh_circle" />
+            android:theme="@style/switchStyle"
+            />
     </RelativeLayout>
 
     <LinearLayout

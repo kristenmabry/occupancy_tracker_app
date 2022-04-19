@@ -14,8 +14,10 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.example.occupancytracker.databinding.ActivityOccupancyBinding;
@@ -38,6 +40,14 @@ public class OccupancyActivity extends AppCompatActivity {
 //        binding.exportButton.setEnabled(false);
         this.initToolbar();
 
+        CompoundButton toggle = (CompoundButton) findViewById(R.id.toggle);
+        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                binding.toggleCaption.setText(getResources().getString(isChecked ? R.string.device_on : R.string.device_off));
+                viewModel.setPowerMode(isChecked);
+            }
+        });
+
         final Intent intent = getIntent();
         final BluetoothDevice device = BluetoothUtils.getSelectedDevice(this);
 
@@ -56,6 +66,10 @@ public class OccupancyActivity extends AppCompatActivity {
                 viewModel.getBatteryLevelState().observe(OccupancyActivity.this, battery -> {
                     binding.batteryPercent.setText(battery + "%");
                     setBatteryIcon(battery);
+                });
+                viewModel.getPowerModeState().observe(OccupancyActivity.this, powerOn -> {
+                  binding.toggleCaption.setText(getResources().getString(powerOn ? R.string.device_on : R.string.device_off));
+                  binding.toggle.setChecked(powerOn);
                 });
                 viewModel.getConnectionState().observe(OccupancyActivity.this, state -> {
                       switch (state.getState()) {
@@ -106,17 +120,21 @@ public class OccupancyActivity extends AppCompatActivity {
 //    }
 
     private void onConnectionStateChanged(final boolean connected) {
-        binding.refresh.setEnabled(connected);
         if (!connected) {
-//            binding.batteryPercent.setText("0%");
+            binding.batteryPercent.setText("--%");
             binding.occupancyNumber.setText("--");
             binding.optionsButton.setEnabled(false);
 //            binding.exportButton.setEnabled(false);
+            binding.batteryImage.setEnabled(false);
+//            binding.toggle.setEnabled(false);
+            binding.toggleCaption.setText(null);
         }
         else {
             Toast.makeText(this, "Successfully connected to device", Toast.LENGTH_SHORT).show();
             binding.optionsButton.setEnabled(true);
 //            binding.exportButton.setEnabled(true);
+            binding.batteryImage.setEnabled(true);
+            binding.toggle.setEnabled(true);
         }
     }
 

@@ -29,18 +29,23 @@ public class OccupancyManager extends ObservableBleManager {
     private final static UUID LBS_UUID_HEIGHT_INT = UUID.fromString("9fed1402-fc85-41c0-be7b-0c6ec45d960e");
     /** Battery Level characteristic UUID. */
     private final static UUID LBS_UUID_BATTERY_INT = UUID.fromString("9fed1403-fc85-41c0-be7b-0c6ec45d960e");
+    /** Power Mode characteristic UUID. */
+    private final static UUID LBS_UUID_POWER_BOOL = UUID.fromString("9fed1404-fc85-41c0-be7b-0c6ec45d960e");
 
     private final MutableLiveData<Integer> occupancyState = new MutableLiveData<>();
     private final MutableLiveData<Integer> ceilingHeightState = new MutableLiveData<>();
     private final MutableLiveData<Integer> batteryLevelState = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> powerModeState = new MutableLiveData<>();
 
     private BluetoothGattCharacteristic occupancyCharacteristic;
     private BluetoothGattCharacteristic ceilingHeightCharacteristic;
     private BluetoothGattCharacteristic batteryLevelCharacteristic;
+    private BluetoothGattCharacteristic powerModeCharacteristic;
     private BluetoothGatt bluetoothGatt;
     private boolean supported;
     private Integer ceilingHeight;
     private Integer batteryLevel;
+    private Boolean powerOn;
 
     public OccupancyManager(@NonNull final Context context) {
         super(context);
@@ -56,6 +61,10 @@ public class OccupancyManager extends ObservableBleManager {
 
     public final LiveData<Integer> getBatteryLevelState() {
         return batteryLevelState;
+    }
+
+    public final LiveData<Boolean> getPowerModeState() {
+        return powerModeState;
     }
 
     @NonNull
@@ -134,6 +143,23 @@ public class OccupancyManager extends ObservableBleManager {
         }
     };
 
+    private final PowerModeDataCallback powerModeCallback = new PowerModeDataCallback() {
+        @Override
+        public void onPowerModeStateChanged(@NonNull final BluetoothDevice device,
+                                               final Boolean newPowerMode) {
+            powerOn = newPowerMode;
+            log(Log.VERBOSE, "Power mode: " + (newPowerMode ? "On" : "Off"));
+            powerModeState.setValue(newPowerMode);
+        }
+
+        @Override
+        public void onInvalidDataReceived(@NonNull final BluetoothDevice device,
+                                          @NonNull final Data data) {
+            // Data can only invalid if we read them. We assume the app always sends correct data.
+            log(Log.WARN, "Invalid data received: " + data);
+        }
+    };
+
     /**
      * BluetoothGatt callbacks object.
      */
@@ -145,6 +171,7 @@ public class OccupancyManager extends ObservableBleManager {
             readCharacteristic(occupancyCharacteristic).with(occupancyCallback).enqueue();
             readCharacteristic(ceilingHeightCharacteristic).with(ceilingHeightCallback).enqueue();
             readCharacteristic(batteryLevelCharacteristic).with(batteryLevelCallback).enqueue();
+            readCharacteristic(powerModeCharacteristic).with(powerModeCallback).enqueue();
             enableNotifications(occupancyCharacteristic).enqueue();
         }
 
@@ -156,6 +183,7 @@ public class OccupancyManager extends ObservableBleManager {
                 occupancyCharacteristic = service.getCharacteristic(LBS_UUID_OCCUPANCY_INT);
                 ceilingHeightCharacteristic = service.getCharacteristic(LBS_UUID_HEIGHT_INT);
                 batteryLevelCharacteristic = service.getCharacteristic(LBS_UUID_BATTERY_INT);
+                powerModeCharacteristic = service.getCharacteristic(LBS_UUID_POWER_BOOL);
             }
 
             boolean writeRequest = false;
@@ -210,6 +238,23 @@ public class OccupancyManager extends ObservableBleManager {
         writeCharacteristic(
                 occupancyCharacteristic,
                 array,
+                BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+        ).with(occupancyCallback).enqueue();
+    }
+
+    public void setPowerMode(final Boolean newPowerMode) {
+        // Are we connected?
+        if (powerModeCharacteristic == null)
+            return;
+
+        // Has the value changed?
+        if (newPowerMode == powerOn)
+            return;
+
+        log(Log.VERBOSE, "Setting power mode to " + (newPowerMode ? "On" : "Off") + "...");
+        writeCharacteristic(
+                occupancyCharacteristic,
+                Data.opCode((byte)(newPowerMode ? 0x01 : 0x00)),
                 BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
         ).with(occupancyCallback).enqueue();
     }

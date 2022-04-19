@@ -11,4 +11,5 @@
     <dimen name="battery_margin">10dp</dimen>
     <dimen name="percent_margin">15dp</dimen>
     <dimen name="percent_size">30sp</dimen>
+    <dimen name="switch_caption_margin">20dp</dimen>
 </resources>
