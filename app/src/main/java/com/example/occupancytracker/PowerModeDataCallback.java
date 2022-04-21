@@ -30,6 +30,6 @@ public abstract class PowerModeDataCallback implements ProfileDataCallback, Data
         }
 
         final int state = data.getIntValue(Data.FORMAT_UINT8, 0);
-        onPowerModeStateChanged(device, state == 0x01 ? true : false);
+        onPowerModeStateChanged(device, state == 0x01 ? false : true);
     }
 }

@@ -126,7 +126,7 @@ public class OccupancyActivity extends AppCompatActivity {
             binding.optionsButton.setEnabled(false);
 //            binding.exportButton.setEnabled(false);
             binding.batteryImage.setEnabled(false);
-//            binding.toggle.setEnabled(false);
+            binding.toggle.setEnabled(false);
             binding.toggleCaption.setText(null);
         }
         else {

@@ -201,6 +201,7 @@ public class OccupancyManager extends ObservableBleManager {
             occupancyCharacteristic = null;
             ceilingHeightCharacteristic = null;
             batteryLevelCharacteristic = null;
+            powerModeCharacteristic = null;
         }
     }
 
@@ -253,10 +254,10 @@ public class OccupancyManager extends ObservableBleManager {
 
         log(Log.VERBOSE, "Setting power mode to " + (newPowerMode ? "On" : "Off") + "...");
         writeCharacteristic(
-                occupancyCharacteristic,
-                Data.opCode((byte)(newPowerMode ? 0x01 : 0x00)),
+                powerModeCharacteristic,
+                Data.opCode((byte)(newPowerMode ? 0x00 : 0x01)),
                 BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-        ).with(occupancyCallback).enqueue();
+        ).with(powerModeCallback).enqueue();
     }
 
     public void getBatteryLevel() {
